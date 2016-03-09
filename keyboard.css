@@ -3,8 +3,8 @@
   padding: 0;
 }
 body {
-  font: 71%/1.5 Verdana, Sans-Serif;
-  background: #eee;
+  font: 85%/1.5 Verdana, Sans-Serif;
+  background: #aaa  ;
 }
 li {
   -webkit-touch-callout: none; /* iOS Safari */
@@ -28,6 +28,7 @@ li {
   border: 1px solid #f9f9f9;
   -moz-border-radius: 5px;
   -webkit-border-radius: 5px;
+  resize: none;
 }
 #keyboard {
   margin: 0;
@@ -86,4 +87,7 @@ li {
   left: 1px;
   border-color: #e5e5e5;
   cursor: pointer;
+}
+.keydown {
+  background-color: aquamarine !important;
 }

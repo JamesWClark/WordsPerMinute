@@ -1,33 +1,78 @@
-/*
-var onkeydown = (function (ev) {
-  console.log('key');
-  var key;
-  var isShift;
-  if (window.event) {
-    key = window.event.keyCode;
-    isShift = !!window.event.shiftKey; // typecast to boolean
-  } else {
-    key = ev.which;
-    isShift = !!ev.shiftKey;
-  }
-  if ( isShift ) {
-    switch (key) {
-      case 16: // ignore shift key
-        break;
-      default:
-        alert(key);
-        // do stuff here?
-        break;
-    }
-  }
-});
-*/
+/* global document, $ */
 
-var init = function() {
-  //register handlers
-  $(document).on('keyup keydown', function(e) {
-    console.log(e.shiftKey);
-  });
+/*
+ * be sure to check this page out for lesson examples
+ * http://touchtype.co/index.php/typing/lessons/1
+ */
+
+var shifted = false;
+var keysDown = {};
+
+var toggleKeys = function (shift) {
+    if (shift) {
+        shifted = true;
+        $('.off').hide();
+        $('.on').show();
+        $('.letter').addClass('uppercase');
+    } else {
+        shifted = false;
+        $('.on').hide();
+        $('.off').show();
+        $('.letter').removeClass('uppercase');
+    }
 };
 
-$(document).ready(init);
+var registerHandlers = function () {
+    
+    // Prevent the backspace key from navigating back.
+    //http://stackoverflow.com/questions/1495219/how-can-i-prevent-the-backspace-key-from-navigating-back
+    $(document).unbind('keydown').bind('keydown', function (event) {
+        var doPrevent = false;
+        if (event.keyCode === 8) {
+            var d = event.srcElement || event.target;
+            if ((d.tagName.toUpperCase() === 'INPUT' &&
+                (
+                    d.type.toUpperCase() === 'TEXT' ||
+                    d.type.toUpperCase() === 'PASSWORD' ||
+                    d.type.toUpperCase() === 'FILE' ||
+                    d.type.toUpperCase() === 'SEARCH' ||
+                    d.type.toUpperCase() === 'EMAIL' ||
+                    d.type.toUpperCase() === 'NUMBER' ||
+                    d.type.toUpperCase() === 'DATE')
+                ) ||
+                d.tagName.toUpperCase() === 'TEXTAREA') {
+                doPrevent = d.readOnly || d.disabled;
+            } else {
+                doPrevent = true;
+            }
+        }
+        if (doPrevent) {
+            event.preventDefault();
+        }
+    });
+
+
+    $(document).on('keyup keydown', function (e) {
+        toggleKeys(e.shiftKey);
+        console.log(e.keyCode);
+    });
+
+    $(document).on('keydown', function (e) {
+        if(e.keyCode === 191) { // firefox: prevent quick search '/'
+            e.preventDefault();
+        }
+        keysDown[e.keyCode] = true;
+        $('[data-keycode=' + e.keyCode + ']').addClass('keydown');
+    });
+
+    $(document).on('keyup', function (e) {
+        keysDown[e.keyCode] = false;
+        $('[data-keycode=' + e.keyCode + ']').removeClass('keydown');
+    });
+
+
+};
+
+$(document).ready(function () {
+    registerHandlers();
+});
