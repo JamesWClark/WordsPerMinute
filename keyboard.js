@@ -5,9 +5,12 @@
  * http://touchtype.co/index.php/typing/lessons/1
  */
 
+var shift = false;
 var capsLock = false;
+var write = $('#write');
 
-var toggleKeys = function (shift) {
+
+var toggleKeys = function () {
     if (shift) {
         $('.off').hide();
         $('.on').show();
@@ -63,9 +66,9 @@ var registerHandlers = function () {
             case 20: // toggle caps lock
                 capsLock = !capsLock;
                 if(capsLock) {
-                    $('[data-keycode=20]').addClass('keydown');
+                    $('.capslock').addClass('keydown');
                 } else {
-                    $('[data-keycode=20]').removeClass('keydown');  
+                    $('.capslock').removeClass('keydown');  
                 }
                 break;
             default:
@@ -96,10 +99,83 @@ var registerHandlers = function () {
             capsLock = false;
             capsKey.removeClass('keydown');
         }
-        var txt = $('#write');
-        txt.val(txt.val() + String.fromCharCode(e.keyCode));
+        write.val(write.val() + String.fromCharCode(e.keyCode));
     });
 
+    //mouse click, screen taps
+    $('#keyboard li').click(function(e) {
+        var target = $(this);
+        var character = target.html();
+        
+        //shift
+        if(target.hasClass('left-shift') || target.hasClass('right-shift')) {
+            target.toggleClass('keydown');
+            $('.letter').toggleClass('uppercase');
+            $('.symbol span').toggle();
+            
+            shift = (shift === true) ? false : true;
+            capslock = false;
+            return false;
+        }
+        
+        //caps lock
+        if(target.hasClass('capslock')) {
+            target.toggleClass('keydown');
+            $('.letter').toggleClass('uppercase');
+            capslock = true;
+            return false;
+        }
+        
+        //delete
+        if(target.hasClass('delete')) {
+            var txt = write.val();
+            write.val(txt.substr(0, txt.length - 1));
+            return false;
+        }
+        
+        //symbols
+        if(target.hasClass('symbol')) {
+            character = $('span:visible', target).html();
+        }
+        
+        //ampersand
+        if(character === '&amp;') {
+            character = '&';
+        }
+        
+        //space
+        if(target.hasClass('space')) {
+            character = ' ';
+        }
+        
+        //tab
+        if(target.hasClass('tab')) {
+            character = '\t';
+        }
+        
+        //return
+        if(target.hasClass('return')) {
+            character = '\n';
+        }
+        
+        //letters
+        if(target.hasClass('uppercase')) {
+            character = character.toUpperCase();
+        }
+        
+        //remove shift after key click
+        if(shift === true) {
+            $('.symbol span').toggle();
+            $('.left-shift, .right-shift').removeClass('keydown');
+            if(capslock === false) {
+                $('.letter').toggleClass('uppercase');
+            }
+            shift = false;
+        }
+        
+        //add the character
+        write.val(write.val() + character);
+    });
 };
 
 $(document).ready(function () {
