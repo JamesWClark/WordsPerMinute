@@ -24,7 +24,6 @@ var updateKeyboard = function(target, event) {
         $('.letter').toggleClass('uppercase');
         $('.symbol span').toggle();
         shift = (shift === true) ? false : true;
-        capslock = false;
         return false;
     }
 
@@ -32,7 +31,7 @@ var updateKeyboard = function(target, event) {
     if(target.hasClass('capslock')) {
         target.toggleClass('keydown');
         $('.letter').toggleClass('uppercase');
-        capslock = true;
+        capsLock = (capsLock === true) ? false : true;
         return false;
     }
 
@@ -41,6 +40,11 @@ var updateKeyboard = function(target, event) {
         var txt = write.val();
         write.val(txt.substr(0, txt.length - 1));
         return false;
+    }
+    
+    //tab - prevent leave focus
+    if(event.keyCode === 9) {
+        event.preventDefault();
     }
 
     //symbols
@@ -92,7 +96,7 @@ var updateKeyboard = function(target, event) {
     if(shift === true && event.type === 'click') {
         $('.symbol span').toggle();
         $('.left-shift, .right-shift').removeClass('keydown');
-        if(capslock === false) {
+        if(capsLock === false) {
             $('.letter').toggleClass('uppercase');
         }
         shift = false;
@@ -133,21 +137,17 @@ var registerHandlers = function () {
         }
     });
     
-    $(document).on('keydown', function(e) {
-       console.log("down"); 
-    });
-    
     // key is down
     $(document).on('keydown', function (e) {
-        console.log(e.keyCode);
         var target = $('[data-keycode=' + e.keyCode + ']');
         updateKeyboard(target, e);
     });
 
     // key is up
     $(document).on('keyup', function (e) {
-        //undo shift
         var target = $('[data-keycode=' + e.keyCode + ']');
+
+        //undo shift
         if(target.hasClass('left-shift') || target.hasClass('right-shift')) {
             target.toggleClass('keydown');
             $('.letter').toggleClass('uppercase');
@@ -155,16 +155,17 @@ var registerHandlers = function () {
             shift = (shift === true) ? false : true;
             return false;
         }
-        //uncolor keys (except caps and shift)
+        
+        //uncolor keys
         if(!target.hasClass('left-shift') && !target.hasClass('right-shift')) {
             target.removeClass('keydown');
         }
         
-        //caps lock off
+        //undo caps lock
         if(target.hasClass('capslock')) {
-            target.toggleClass('keydown');
-            $('.letter').toggleClass('uppercase');
-            capslock = false;
+            target.removeClass('keydown');
+            $('.letter').removeClass('uppercase');
+            capsLock = false;
         }
     });
 
@@ -174,7 +175,6 @@ var registerHandlers = function () {
         var target = $(this);
         updateKeyboard(target, e);
     });
-    */
     
     $('#keyboard li').on('mousedown touchstart', function(e) {
         var target = $(this);
@@ -193,9 +193,10 @@ var registerHandlers = function () {
         if(target.hasClass('capslock')) {
             target.toggleClass('keydown');
             $('.letter').toggleClass('uppercase');
-            capslock = false;
+            capsLock = false;
         }
     });
+    */
 };
 
 $(document).ready(function () {
