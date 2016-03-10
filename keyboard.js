@@ -9,6 +9,7 @@ var shift = false;
 var capsLock = false;
 var write = $('#write');
 
+//update the state of the keys pressed in the keyboard UI
 var updateKeyboard = function(target, event) {
     var character = target.html();
     
@@ -167,10 +168,33 @@ var registerHandlers = function () {
         }
     });
 
-    //mouse clicked or screen tapped
+    /*
+    //mouse clicked
     $('#keyboard li').click(function(e) {
         var target = $(this);
         updateKeyboard(target, e);
+    });
+    */
+    
+    $('#keyboard li').on('mousedown touchstart', function(e) {
+        var target = $(this);
+        updateKeyboard(target, e);
+    });
+    
+    $('#keyboard li').on('mouseup touchend', function(e) {
+        var target = $(this);
+        
+        //uncolor keys (except caps and shift)
+        if(!target.hasClass('left-shift') && !target.hasClass('right-shift')) {
+            target.removeClass('keydown');
+        }
+        
+        //caps lock off
+        if(target.hasClass('capslock')) {
+            target.toggleClass('keydown');
+            $('.letter').toggleClass('uppercase');
+            capslock = false;
+        }
     });
 };
 
