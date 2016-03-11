@@ -11,6 +11,9 @@ var write = $('#write');
 
 //update the state of the keys pressed in the keyboard UI
 var updateKeyboard = function(target, event) {
+    
+    console.log(event.keyCode);
+    
     var character = target.html();
     
     //color keys (except shift and caps)
