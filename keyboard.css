@@ -14,7 +14,7 @@ li, #write {
   -ms-user-select: none;       /* IE/Edge */
   user-select: none;           /* non-prefixed version, currently not supported by any browser */
 }
-#container {
+#keyboard-container {
   margin: 100px auto;
   width: 688px;
 }
@@ -106,4 +106,24 @@ li, #write {
     border-radius: 4px;
     background-color: rgba(0,0,0,.5);
     -webkit-box-shadow: 0 0 1px rgba(255,255,255,.5);
+}
+
+#event-container {
+  width: 200px;
+}
+
+.block {
+  display: block;
+}
+
+.inline {
+  display: inline-block;
+}
+
+.label {
+  width: 75px;
+}
+
+.value {
+  width: 75px;
 }

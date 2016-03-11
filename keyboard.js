@@ -4,10 +4,49 @@
  * be sure to check this page out for lesson examples
  * http://touchtype.co/index.php/typing/lessons/1
  */
-
-var shift = false;
-var capsLock = false;
 var write = $('#write');
+
+shift = false;
+capsLock = false;
+
+var Keycode = {
+    ALT: 18,
+    BACKSPACE : 8,
+    CAPSLOCK: 20,
+    CONTROL: 17,
+    DELETE: 46,
+    DOWN: 40,
+    END: 35,
+    ESCAPE: 27,
+    F1: 112,
+    F2: 113,
+    F3: 114,
+    F4: 115,
+    F5: 116,
+    F6: 117,
+    F7: 118,
+    F8: 119,
+    F9: 120,
+    F10: 121,
+    F11: 122,
+    F12: 123,
+    HOME: 36,
+    INSERT: 45,
+    LEFT: 37,
+    NUM_LOCK: 144,
+    PAGE_UP: 33,
+    PAGE_DOWN: 34,
+    PAUSE_BREAK: 19,
+    RETURN: 13,
+    RIGHT: 39,
+    SCROLL_LOCK: 145,
+    SHIFT: 16,
+    SPACE: 32,
+    TAB: 9,
+    UP: 38,
+    WINDOWS: 92 //not sure about this one - could be HOME instead - need to try it on Mac
+};
+
 
 //update the state of the keys pressed in the keyboard UI
 var updateKeyboard = function(target, event) {
@@ -117,7 +156,7 @@ var registerHandlers = function () {
     // http://stackoverflow.com/questions/1495219/how-can-i-prevent-the-backspace-key-from-navigating-back
     $(document).unbind('keydown').bind('keydown', function (event) {
         var doPrevent = false;
-        if (event.keyCode === 8) {
+        if (event.keyCode === Keycode.BACKSPACE) {
             var d = event.srcElement || event.target;
             if ((d.tagName.toUpperCase() === 'INPUT' &&
                 (
@@ -142,12 +181,15 @@ var registerHandlers = function () {
     
     // key is down
     $(document).on('keydown', function (e) {
+        $('#keydown').html(e.keyCode);
         var target = $('[data-keycode=' + e.keyCode + ']');
         updateKeyboard(target, e);
     });
 
     // key is up
     $(document).on('keyup', function (e) {
+        $('#keyup').html(e.keyCode);
+        
         var target = $('[data-keycode=' + e.keyCode + ']');
 
         //undo shift
@@ -171,35 +213,11 @@ var registerHandlers = function () {
             capsLock = false;
         }
     });
-
-    /*
-    //mouse clicked
-    $('#keyboard li').click(function(e) {
-        var target = $(this);
-        updateKeyboard(target, e);
-    });
     
-    $('#keyboard li').on('mousedown touchstart', function(e) {
-        var target = $(this);
-        updateKeyboard(target, e);
+    $(document).on('keypress', function(e) {
+        console.log(e.keyCode);
+        $('#keypress').html(e.which);
     });
-    
-    $('#keyboard li').on('mouseup touchend', function(e) {
-        var target = $(this);
-        
-        //uncolor keys (except caps and shift)
-        if(!target.hasClass('left-shift') && !target.hasClass('right-shift')) {
-            target.removeClass('keydown');
-        }
-        
-        //caps lock off
-        if(target.hasClass('capslock')) {
-            target.toggleClass('keydown');
-            $('.letter').toggleClass('uppercase');
-            capsLock = false;
-        }
-    });
-    */
 };
 
 $(document).ready(function () {
