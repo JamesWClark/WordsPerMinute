@@ -1,3 +1,10 @@
 <script>
-    window.location = window.location.href + 'keyboard.html';
+    //redirects to keyboard.html
+    var href = window.location.href;
+    if(href.indexOf('index.html') !== -1) { //url contains index.html
+        href = href.replace('index.html','keyboard.html');
+    } else {
+        href = href + 'keyboard.html';
+    }
+    window.location = href;
 </script>
