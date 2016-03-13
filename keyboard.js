@@ -6,8 +6,9 @@
  */
 var write = $('#write');
 
-shift = false;
-capsLock = false;
+var keydown = {};
+var shift = false;
+var capsLock = false;
 
 var Keycode = {
     ALT: 18,
@@ -30,6 +31,7 @@ var Keycode = {
     F10: 121,
     F11: 122,
     F12: 123,
+    FORWARD_SLASH: 191,
     HOME: 36,
     INSERT: 45,
     LEFT: 37,
@@ -43,6 +45,7 @@ var Keycode = {
     SHIFT: 16,
     SPACE: 32,
     TAB: 9,
+    TICK: 222,
     UP: 38,
     WINDOWS: 92 //not sure about this one - could be HOME instead - need to try it on Mac
 };
@@ -84,10 +87,14 @@ var updateKeyboard = function(target, event) {
         return false;
     }
     
-    //tab - prevent leave focus
-    if(event.keyCode === 9) {
+    //tab, forward slash, or tick mark - prevent leave focus
+    if(event.keyCode === Keycode.FORWARD_SLASH || 
+       event.keyCode === Keycode.TAB || 
+       event.keyCode === Keycode.TICK) {
         event.preventDefault();
     }
+    
+    //tick - prevent leave focus in firefox
 
     //symbols
     if(target.hasClass('symbol')) {
@@ -101,7 +108,7 @@ var updateKeyboard = function(target, event) {
 
     //less than
     if(character === '&lt;') {
-        character = '<'
+        character = '<';
     }
 
     //greater than
@@ -181,15 +188,31 @@ var registerHandlers = function () {
     
     // key is down
     $(document).on('keydown', function (e) {
-        $('#keydown').html(e.keyCode);
-        var target = $('[data-keycode=' + e.keyCode + ']');
-        updateKeyboard(target, e);
+        //http://stackoverflow.com/questions/9098901/how-to-disable-repetitive-keydown-in-jquery
+        var key = e.keyCode || e.which;
+        if(keydown[key] == null) {
+            var target = $('[data-keycode=' + key + ']');
+            updateKeyboard(target, e);
+            keydown[key] = true;
+            
+            //update the event keycode display and log the result
+            if(e.which) {
+                console.log('e.which = ' + e.which);
+                $('#keypress').html(e.which);
+            }
+            if (e.keyCode) {
+                console.log('e.keyCode = ' + e.keyCode);
+                $('#keydown').html(e.keyCode);
+            }
+        }
     });
 
     // key is up
     $(document).on('keyup', function (e) {
-        $('#keyup').html(e.keyCode);
+        var key = e.keyCode || e.which;
+        keydown[key] = null;
         
+        $('#keyup').html(key);
         var target = $('[data-keycode=' + e.keyCode + ']');
 
         //undo shift
@@ -202,21 +225,9 @@ var registerHandlers = function () {
         }
         
         //uncolor keys
-        if(!target.hasClass('left-shift') && !target.hasClass('right-shift')) {
+        if(!target.hasClass('capslock')) {
             target.removeClass('keydown');
         }
-        
-        //undo caps lock
-        if(target.hasClass('capslock')) {
-            target.removeClass('keydown');
-            $('.letter').removeClass('uppercase');
-            capsLock = false;
-        }
-    });
-    
-    $(document).on('keypress', function(e) {
-        console.log(e.keyCode);
-        $('#keypress').html(e.which);
     });
 };
 
