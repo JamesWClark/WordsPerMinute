@@ -194,16 +194,6 @@ var registerHandlers = function () {
             var target = $('[data-keycode=' + key + ']');
             updateKeyboard(target, e);
             keydown[key] = true;
-            
-            //update the event keycode display and log the result
-            if(e.which) {
-                console.log('e.which = ' + e.which);
-                $('#keypress').html(e.which);
-            }
-            if (e.keyCode) {
-                console.log('e.keyCode = ' + e.keyCode);
-                $('#keydown').html(e.keyCode);
-            }
         }
     });
 
@@ -211,8 +201,6 @@ var registerHandlers = function () {
     $(document).on('keyup', function (e) {
         var key = e.keyCode || e.which;
         keydown[key] = null;
-        
-        $('#keyup').html(key);
         var target = $('[data-keycode=' + e.keyCode + ']');
 
         //undo shift
@@ -228,6 +216,47 @@ var registerHandlers = function () {
         if(!target.hasClass('capslock')) {
             target.removeClass('keydown');
         }
+        
+        if(target.hasClass('capslock')) {
+            target.removeClass('keydown');
+            $('.letter').removeClass('uppercase');
+            capsLock = false;
+        }
+    });
+    
+    // detect caps lock - in keypress event bc keydown and keypress give different charcodes,
+    // http://stackoverflow.com/questions/348792/how-do-you-tell-if-caps-lock-is-on-using-javascript
+    $(document).keypress(function(e) {
+        var s = String.fromCharCode(e.which);
+        var key = e.keyCode || e.which;
+        var target = $('[data-keycode=' + e.keyCode + ']');
+        $('#string').html(s);
+        
+        // set correct caps lock state
+        if (target.hasClass('letter') && !capsLock && s.toUpperCase() === s && s.toLowerCase() !== s && !e.shiftKey) {
+            //alert('caps fix');
+            $('.capslock').toggleClass('keydown');
+            $('.letter').toggleClass('uppercase');
+            capsLock = (capsLock === true) ? false : true;
+            
+            // replace last character with corrected caps version (keypress event happens after keydown event)
+            var letter = write.val()[write.val().length - 1];
+            write.val(write.val().slice(0,-1) + letter.toUpperCase());
+            return false;
+        }
+    });
+    
+    // update event UI
+    $(document).on('keydown', function(e) {
+        $('#keydown').html(e.keyCode);
+    });
+    
+    $(document).on('keyup', function(e) {
+        $('#keyup').html(e.keyCode);
+    });
+    
+    $(document).on('keypress', function(e) {
+        $('#keypress').html(e.keyCode);
     });
 };
 
