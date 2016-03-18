@@ -14,10 +14,28 @@ li, #write {
   -ms-user-select: none;       /* IE/Edge */
   user-select: none;           /* non-prefixed version, currently not supported by any browser */
 }
-#keyboard-container {
+#keyboard-container, #test-container {
   margin: 100px auto;
   width: 688px;
 }
+
+#test-container .flex .inline {
+    margin: 4px;
+    background-color: #fff;
+    border: solid black 1px;
+    padding: 4px;
+    width: 1em;
+    height: 1em;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+#test-container .flex {
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
 #write {
   margin: 0 0 5px;
   padding: 5px;
@@ -126,4 +144,23 @@ li, #write {
 
 .value {
   width: 75px;
+}
+
+.flex {
+    display: flex;
+}
+
+.x1 { flex: 1; }
+.x2 { flex: 2; }
+.x3 { flex: 3; }
+.x4 { flex: 4; }
+.x5 { flex: 5; }
+.x6 { flex: 6; }
+
+.green {
+    background-color: lawngreen !important;
+}
+
+.red {
+    background-color: orangered !important;
 }

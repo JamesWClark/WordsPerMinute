@@ -4,16 +4,23 @@
  * be sure to check this page out for lesson examples
  * http://touchtype.co/index.php/typing/lessons/1
  */
-var write = $('#write');
 
-var keydown = {};
+var write = $('#write');
+var test = $('#test-container');
+
+var keydown = {}; // used as a dictionary for marking keydowns, preventing key repeat
 var shift = false;
 var capsLock = false;
+
+var testCount = 0;
+var globalCharacter = '';
+var charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890!@#$%^&*()`~-_=+[{]}\|;:'\",<.>/?";
 
 var Keycode = {
     ALT: 18,
     BACKSPACE : 8,
     CAPSLOCK: 20,
+    COMMAND: 91, // osx
     CONTROL: 17,
     DELETE: 46,
     DOWN: 40,
@@ -47,14 +54,40 @@ var Keycode = {
     TAB: 9,
     TICK: 222,
     UP: 38,
-    WINDOWS: 92 //not sure about this one - could be HOME instead - need to try it on Mac
+    WINDOWS: 92
 };
 
+// inclusive random integer
+// https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Math/random
+var getRandomIntInclusive = function(min, max) {
+    return Math.floor(Math.random() * (max - min + 1)) + min;
+};
+
+var getRandomPrint = function() {
+    return charset[getRandomIntInclusive(0,charset.length-1)];
+};
+
+var genSequence = function() {
+    var w = $('#keyboard-container').innerWidth();
+    var ems = parseFloat($('html').css('font-size'));
+    var wxems = w/(16 + ems) - 1;
+    var test = $('#test-container .test');
+    for(var i = 0; i < wxems; i++) {
+        test.append('<div class="inline char" id="char' + i + '"></div>');
+    }
+    var count = 0;
+    while(count < wxems) {
+        var rand = getRandomIntInclusive(1,6);
+        for(var i = 0; i < rand; i++) {
+            var c = getRandomPrint();
+            $('#char' + count++).html(c);
+        }
+        $('#char' + count++).html(' ');
+    }
+};
 
 //update the state of the keys pressed in the keyboard UI
 var updateKeyboard = function(target, event) {
-    
-    console.log(event.keyCode);
     
     var character = target.html();
     
@@ -155,11 +188,18 @@ var updateKeyboard = function(target, event) {
     if(character != null) {
         write.val(write.val() + character);
     }
+
+    var target = $('#char' + testCount++);
+    if(character === target.text()) {
+        target.addClass('green');
+    } else {
+        target.addClass('red');
+    }
 };
 
 var registerHandlers = function () {
     
-    // prevent backspace (delete) navigation
+    // prevent backspace navigation
     // http://stackoverflow.com/questions/1495219/how-can-i-prevent-the-backspace-key-from-navigating-back
     $(document).unbind('keydown').bind('keydown', function (event) {
         var doPrevent = false;
@@ -188,11 +228,13 @@ var registerHandlers = function () {
     
     // key is down
     $(document).on('keydown', function (e) {
-        //http://stackoverflow.com/questions/9098901/how-to-disable-repetitive-keydown-in-jquery
+        
+        // disable key repeat
+        // http://stackoverflow.com/questions/9098901/how-to-disable-repetitive-keydown-in-jquery
         var key = e.keyCode || e.which;
         if(keydown[key] == null) {
             var target = $('[data-keycode=' + key + ']');
-            updateKeyboard(target, e);
+            globalCharacter = updateKeyboard(target, e);
             keydown[key] = true;
         }
     });
@@ -203,7 +245,7 @@ var registerHandlers = function () {
         keydown[key] = null;
         var target = $('[data-keycode=' + e.keyCode + ']');
 
-        //undo shift
+        // undo shift
         if(target.hasClass('left-shift') || target.hasClass('right-shift')) {
             target.toggleClass('keydown');
             $('.letter').toggleClass('uppercase');
@@ -212,11 +254,10 @@ var registerHandlers = function () {
             return false;
         }
         
-        //uncolor keys
+        // uncolor keys
         if(!target.hasClass('capslock')) {
             target.removeClass('keydown');
         }
-        
         if(target.hasClass('capslock')) {
             target.removeClass('keydown');
             $('.letter').removeClass('uppercase');
@@ -230,7 +271,6 @@ var registerHandlers = function () {
         var s = String.fromCharCode(e.which);
         var key = e.keyCode || e.which;
         var target = $('[data-keycode=' + e.keyCode + ']');
-        $('#string').html(s);
         
         // set correct caps lock state
         if (target.hasClass('letter') && !capsLock && s.toUpperCase() === s && s.toLowerCase() !== s && !e.shiftKey) {
@@ -256,10 +296,13 @@ var registerHandlers = function () {
     });
     
     $(document).on('keypress', function(e) {
+        var s = String.fromCharCode(e.which);
+        $('#string').html(s);
         $('#keypress').html(e.keyCode);
     });
 };
 
 $(document).ready(function () {
     registerHandlers();
+    genSequence();
 });
