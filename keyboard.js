@@ -14,13 +14,13 @@ var capsLock = false;
 
 var testCount = 0;
 var globalCharacter = '';
-var charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890!@#$%^&*()`~-_=+[{]}\|;:'\",<.>/?";
 
+var charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890!@#$%^&*()`~-_=+[{]}\|;:'\",<.>/?";
 var Keycode = {
     ALT: 18,
     BACKSPACE : 8,
     CAPSLOCK: 20,
-    COMMAND: 91, // osx
+    COMMAND: 91, // osx apple key
     CONTROL: 17,
     DELETE: 46,
     DOWN: 40,
@@ -63,20 +63,25 @@ var getRandomIntInclusive = function(min, max) {
     return Math.floor(Math.random() * (max - min + 1)) + min;
 };
 
+// returns a random character from `charset` variable
 var getRandomPrint = function() {
     return charset[getRandomIntInclusive(0,charset.length-1)];
 };
 
+// generates a random sequence of characters for a typing test
 var genSequence = function() {
     var w = $('#keyboard-container').innerWidth();
     var ems = parseFloat($('html').css('font-size'));
     var wxems = w/(16 + ems) - 1;
     var test = $('#test-container .test');
-    for(var i = 0; i < wxems; i++) {
+    var count = testCount;
+    for(var i = count; i < testCount + wxems - 1; i++) {
         test.append('<div class="inline char" id="char' + i + '"></div>');
     }
-    var count = 0;
-    while(count < wxems) {
+    test.append('<div class="inline char last" id="char' + (testCount + parseInt(wxems)) + '"></div>'); // the last one
+    
+    count = testCount;
+    while(count < wxems + testCount) {
         var rand = getRandomIntInclusive(1,6);
         for(var i = 0; i < rand; i++) {
             var c = getRandomPrint();
@@ -194,6 +199,10 @@ var updateKeyboard = function(target, event) {
         target.addClass('green');
     } else {
         target.addClass('red');
+    }
+    
+    if(target.hasClass('last')) {
+        genSequence();
     }
 };
 
