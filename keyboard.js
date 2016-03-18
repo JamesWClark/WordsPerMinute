@@ -3,6 +3,9 @@
 /*
  * be sure to check this page out for lesson examples
  * http://touchtype.co/index.php/typing/lessons/1
+ *
+ * and speed typing formulas
+ * http://www.speedtypingonline.com/typing-equations
  */
 
 var write = $('#write');
@@ -12,8 +15,11 @@ var keydown = {}; // used as a dictionary for marking keydowns, preventing key r
 var shift = false;
 var capsLock = false;
 
+var numCorrect = 0;
 var testCount = 0;
 var globalCharacter = '';
+
+var startTime; // initialized by first key press in `updateKeyboard` method
 
 var charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890!@#$%^&*()`~-_=+[{]}\|;:'\",<.>/?";
 var Keycode = {
@@ -57,6 +63,24 @@ var Keycode = {
     WINDOWS: 92
 };
 
+var possible = $('#possible');
+var correct  = $('#correct');
+var grosswpm = $('#gross-wpm');
+var netwpm   = $('#netwpm');
+var accuracy = $('#accuracy');
+
+var updateStats = function() {
+    var elapsedMinutes = moment();
+    elapsedMinutes = elapsedMinutes.diff(startTime) / 1000 / 60;
+    console.log(elapsedMinutes);
+    possible.html(testCount);
+    correct.html(numCorrect);
+    grosswpm.html((testCount / 5) / elapsedMinutes);
+    netwpm.html();
+    accuracy.html(numCorrect / testCount);
+    setTimeout(updateStats, 1000);
+};
+
 // inclusive random integer
 // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Math/random
 var getRandomIntInclusive = function(min, max) {
@@ -95,6 +119,11 @@ var genSequence = function() {
 var updateKeyboard = function(target, event) {
     
     var character = target.html();
+    
+    if(startTime == null) {
+        startTime = moment();
+        updateStats();
+    }
     
     //color keys (except shift and caps)
     if(!target.hasClass('capslock') && !target.hasClass('left-shift') && !target.hasClass('right-shift')) {
@@ -194,9 +223,11 @@ var updateKeyboard = function(target, event) {
         write.val(write.val() + character);
     }
 
+    // check correctness
     var target = $('#char' + testCount++);
     if(character === target.text()) {
         target.addClass('green');
+        numCorrect++;
     } else {
         target.addClass('red');
     }

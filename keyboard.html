@@ -11,23 +11,50 @@
 <body>
 
 
-  <div id="event-container">
-    <div class="block">
-      <div class="inline label">keyup:</div>
-      <div class="inline value" id="keyup"></div>
+  <div class="flex" id="event-container">
+   
+    <div class="inline">
+        <div class="block">
+          <div class="inline label">keyup:</div>
+          <div class="inline value" id="keyup"></div>
+        </div>
+        <div class="block">  
+          <div class="inline label">keydown: </div>
+          <div class="inline value" id="keydown"></div>
+        </div>
+        <div class="block">
+          <div class="inline label">keypress: </div>
+          <div class="inline value" id="keypress"></div>
+        </div>
+        <div class="block">
+            <div class="inline label">string: </div>
+            <div class="inline value" id="string"></div>
+        </div>
     </div>
-    <div class="block">  
-      <div class="inline label">keydown: </div>
-      <div class="inline value" id="keydown"></div>
+    
+    <div class="inline">
+        <div class="block">
+            <div class="inline label">possible: </div>
+            <div class="inline value" id="possible"></div>
+        </div>
+        <div class="block">
+            <div class="inline label">correct</div>
+            <div class="inline value" id="correct"></div>
+        </div>
+        <div class="block">
+            <div class="inline label">gross wpm: </div>
+            <div class="inline value" id="gross-wpm"></div>
+        </div>
+        <div class="block">
+            <div class="inline label">net wpm: </div>
+            <div class="inline value" id="net-wpm"></div>
+        </div>
+        <div class="block">
+            <div class="inline label">accuracy: </div>
+            <div class="inline value" id="accuracy"></div>
+        </div>
     </div>
-    <div class="block">
-      <div class="inline label">keypress: </div>
-      <div class="inline value" id="keypress"></div>
-    </div>
-    <div class="block">
-        <div class="inline label">string: </div>
-        <div class="inline value" id="string"></div>
-    </div>
+    
   </div>
   
   <div id="test-container">
@@ -97,6 +124,7 @@
   </div>
 
   <script src="https://code.jquery.com/jquery-2.2.1.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.12.0/moment.min.js"></script>
   <script src="keyboard.js"></script>
 </body>
 
