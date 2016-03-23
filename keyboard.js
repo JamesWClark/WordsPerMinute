@@ -6,6 +6,9 @@
  *
  * and speed typing formulas
  * http://www.speedtypingonline.com/typing-equations
+ *
+ * keyup keydown fires
+ * http://www.javascripter.net/faq/keycodes.htm
  */
 
 var write = $('#write');
@@ -17,7 +20,7 @@ var capsLock = false;
 
 var numCorrect = 0;
 var testCount = 0;
-var globalCharacter = '';
+var globalCharacter = null;
 
 var startTime; // initialized by first key press in `updateKeyboard` method
 
@@ -69,10 +72,10 @@ var grosswpm = $('#gross-wpm');
 var netwpm   = $('#netwpm');
 var accuracy = $('#accuracy');
 
+// update the related wpm stats
 var updateStats = function() {
     var elapsedMinutes = moment();
     elapsedMinutes = elapsedMinutes.diff(startTime) / 1000 / 60;
-    console.log(elapsedMinutes);
     possible.html(testCount);
     correct.html(numCorrect);
     grosswpm.html((testCount / 5) / elapsedMinutes);
@@ -115,6 +118,24 @@ var genSequence = function() {
     }
 };
 
+var matchSequence = function(character) {
+    // check per character correctness
+    if(character !== null) {
+        var compareTo = $('#char' + testCount++);
+        if(character === compareTo.text()) {
+            compareTo.addClass('green');
+            numCorrect++;
+        } else {
+            compareTo.addClass('red');
+        }
+
+        if(compareTo.hasClass('last')) {
+            genSequence();
+        }
+        write.val(write.val() + character);
+    }
+}
+
 //update the state of the keys pressed in the keyboard UI
 var updateKeyboard = function(target, event) {
     
@@ -136,7 +157,7 @@ var updateKeyboard = function(target, event) {
         $('.letter').toggleClass('uppercase');
         $('.symbol span').toggle();
         shift = (shift === true) ? false : true;
-        return false;
+        return null;
     }
 
     //caps lock
@@ -144,30 +165,40 @@ var updateKeyboard = function(target, event) {
         target.toggleClass('keydown');
         $('.letter').toggleClass('uppercase');
         capsLock = (capsLock === true) ? false : true;
-        return false;
+        return null;
     }
 
     //delete
     if(target.hasClass('delete')) {
         var txt = write.val();
         write.val(txt.substr(0, txt.length - 1));
-        return false;
+        return null;
     }
     
-    //tab, forward slash, or tick mark - prevent leave focus
-    if(event.keyCode === Keycode.FORWARD_SLASH || 
-       event.keyCode === Keycode.TAB || 
-       event.keyCode === Keycode.TICK) {
+    //forward slash - prevent leave focus
+    if(event.keyCode === Keycode.FORWARD_SLASH) {
         event.preventDefault();
+        character = '/';
+    }
+    
+    //tab - prevent leave focus
+    if(event.keyCode === Keycode.TAB) {
+        event.preventDefault();
+        character = '\t';
+        return null;
     }
     
     //tick - prevent leave focus in firefox
-
+    if(event.keyCode === Keycode.TICK) {
+        event.preventDefault();
+        character = "'";
+    }
+    
     //symbols
     if(target.hasClass('symbol')) {
         character = $('span:visible', target).html();
     }
-
+    
     //ampersand
     if(character === '&amp;') {
         character = '&';
@@ -190,6 +221,7 @@ var updateKeyboard = function(target, event) {
 
     //space
     if(target.hasClass('space')) {
+        event.preventDefault();
         character = ' ';
     }
 
@@ -217,26 +249,25 @@ var updateKeyboard = function(target, event) {
         }
         shift = false;
     }
-    
-    //add the character
-    if(character != null) {
-        write.val(write.val() + character);
-    }
+    return character;
+};
 
-    // check correctness
-    var target = $('#char' + testCount++);
-    if(character === target.text()) {
-        target.addClass('green');
-        numCorrect++;
-    } else {
-        target.addClass('red');
-    }
-    
-    if(target.hasClass('last')) {
-        genSequence();
+// return the dom element that matches associated keyup / keydown event
+var getTarget = function(key) {
+    // normalize keyup / keydown from firefox
+    switch(key) {
+        case 59:  // semicolon, colon
+            return $('[data-keycode=186]');
+        case 61:  // equals, plus
+            return $('[data-keycode=187]');
+        case 173: // dash, underscore
+            return $('[data-keycode=189]');
+        default:
+            return $('[data-keycode=' + key + ']');
     }
 };
 
+// register all the event handlers, called on page load
 var registerHandlers = function () {
     
     // prevent backspace navigation
@@ -273,8 +304,9 @@ var registerHandlers = function () {
         // http://stackoverflow.com/questions/9098901/how-to-disable-repetitive-keydown-in-jquery
         var key = e.keyCode || e.which;
         if(keydown[key] == null) {
-            var target = $('[data-keycode=' + key + ']');
+            var target = getTarget(key);
             globalCharacter = updateKeyboard(target, e);
+            matchSequence(globalCharacter);
             keydown[key] = true;
         }
     });
@@ -283,7 +315,7 @@ var registerHandlers = function () {
     $(document).on('keyup', function (e) {
         var key = e.keyCode || e.which;
         keydown[key] = null;
-        var target = $('[data-keycode=' + e.keyCode + ']');
+        var target = getTarget(key);
 
         // undo shift
         if(target.hasClass('left-shift') || target.hasClass('right-shift')) {
@@ -298,6 +330,8 @@ var registerHandlers = function () {
         if(!target.hasClass('capslock')) {
             target.removeClass('keydown');
         }
+        
+        // uncolor keys
         if(target.hasClass('capslock')) {
             target.removeClass('keydown');
             $('.letter').removeClass('uppercase');
@@ -308,13 +342,13 @@ var registerHandlers = function () {
     // detect caps lock - in keypress event bc keydown and keypress give different charcodes,
     // http://stackoverflow.com/questions/348792/how-do-you-tell-if-caps-lock-is-on-using-javascript
     $(document).keypress(function(e) {
+        console.log('keypres');
         var s = String.fromCharCode(e.which);
         var key = e.keyCode || e.which;
-        var target = $('[data-keycode=' + e.keyCode + ']');
+        var target = getTarget(key);
         
         // set correct caps lock state
         if (target.hasClass('letter') && !capsLock && s.toUpperCase() === s && s.toLowerCase() !== s && !e.shiftKey) {
-            //alert('caps fix');
             $('.capslock').toggleClass('keydown');
             $('.letter').toggleClass('uppercase');
             capsLock = (capsLock === true) ? false : true;
